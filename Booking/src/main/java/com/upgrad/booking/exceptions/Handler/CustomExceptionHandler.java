@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 
 	private String NO_RECORDS_FOUND = "NO_RECORDS_FOUND";
+	
     @ExceptionHandler(RecordNotFoundException.class)
     public final ResponseEntity<ErrorResponse> handleRecordNotFoundException(RecordNotFoundException e, WebRequest req){
 
@@ -32,6 +33,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
         return new ResponseEntity(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders httpHeaders, HttpStatus httpStatus, WebRequest webRequest){
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", httpStatus.value());
