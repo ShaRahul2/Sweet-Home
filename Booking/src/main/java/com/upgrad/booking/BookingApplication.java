@@ -15,8 +15,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @RestController
 @SpringBootApplication
 @EnableEurekaClient
-@EnableFeignClients
-@EnableAspectJAutoProxy
+//@EnableFeignClients
+//@EnableAspectJAutoProxy
 public class BookingApplication {
 
 	public static void main(String[] args) {

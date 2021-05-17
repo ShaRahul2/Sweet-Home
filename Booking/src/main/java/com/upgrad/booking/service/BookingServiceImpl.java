@@ -3,6 +3,8 @@ package com.upgrad.booking.service;
 import com.upgrad.booking.dao.BookingDao;
 import com.upgrad.booking.dto.PaymentDto;
 import com.upgrad.booking.entities.BookingInfoEntity;
+import com.upgrad.booking.exceptions.model.BookingIDNotFoundException;
+import com.upgrad.booking.exceptions.model.PaymentModeNotFound;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -32,7 +35,7 @@ public class BookingServiceImpl implements BookingService {
 		booking.setRoomPrice((int) (1000 * booking.getNumOfRooms() * (noOfDays)));
 		String str = getRandomNumbers(booking.getNumOfRooms()).stream().collect(Collectors.joining(","));
 		booking.setRoomNumbers(str);
-		ProduceKafkaMessage(booking);
+		//ProduceKafkaMessage(booking);
 		return bookingDao.save(booking);
 	}
 
@@ -50,12 +53,29 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public BookingInfoEntity getBookingDetails(int id) {
-		return bookingDao.findById(id).get();
+Optional<BookingInfoEntity> bookingOptional = Optional.of(bookingDao.findById(id).get());
+		
+		if(! bookingOptional.isPresent()) {
+			throw new BookingIDNotFoundException("Invalid Booking Id");
+		}	
+		return bookingOptional.get();
 	}
 
 	@Override
 	public BookingInfoEntity updateBookingDetails(int bookingId, PaymentDto paymentDto) {
-		BookingInfoEntity savedBooking = getBookingDetails(bookingId);
+		System.out.println(paymentDto.getPaymentMode());
+		System.out.println("");
+//(!paymentDto.getPaymentMode().toLowerCase() == ("upi") || !paymentDto.getPaymentMode().toLowerCase()==("card")) {
+//			throw new PaymentModeNotFound("Invalid mode of payment");
+//		}
+		
+		Optional<BookingInfoEntity> bookingOptional = Optional.of(getBookingDetails(bookingId));
+		
+		if(! bookingOptional.isPresent()) {
+			throw new BookingIDNotFoundException("Invalid Booking Id");
+		}		
+		
+		BookingInfoEntity savedBooking = bookingOptional.get();		
 		savedBooking.setTransactionId(0);
 		bookingDao.save(savedBooking);
 		ProduceKafkaMessage(savedBooking);
@@ -74,7 +94,7 @@ public class BookingServiceImpl implements BookingService {
 		KafkaProducer kafkaProducer = new KafkaProducer(properties);
 		try {
 		
-			kafkaProducer.send(new ProducerRecord("hotelbooking", Integer.toString(0), message));
+			kafkaProducer.send(new ProducerRecord("message", Integer.toString(0), message));
 
 		} catch (Exception e) {
 			e.printStackTrace();

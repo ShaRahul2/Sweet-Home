@@ -47,14 +47,12 @@ public class BookingController {
 	}
 
 	/**
-	 * Method for updating transaction id in Booking 127.0.0.1:8080/booking
+	 * Method for updating transaction id in Booking 127.0.0.1:8080/booking/{id}/payment
 	 */
 	@PostMapping(value = "booking/{id}/payment", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<BookingInfoEntity> updateMovieDetails(@PathVariable(name = "id") int id, @RequestBody PaymentDto paymentDto) {
-
-		BookingInfoEntity udpatedBooking = bookingService.updateBookingDetails(id, paymentDto);
-
-		return new ResponseEntity<BookingInfoEntity>(udpatedBooking, HttpStatus.CREATED);
+		BookingInfoEntity bookingInfoEntity =  bookingService.updateBookingDetails(id, paymentDto);
+		return new ResponseEntity<BookingInfoEntity>(bookingInfoEntity, HttpStatus.CREATED);
 	}
 	
 	
